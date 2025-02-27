@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose; // ✅ Extragem Schema din mongoose
+const { Schema } = mongoose; // ✅ Extragem Schema din mongoose dsafa
 
 const EmployeeSchema = new Schema({
     nume: { type: String, required: true },
