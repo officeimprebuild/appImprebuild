@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
       nume,
       tip,
       serie: tip === "scula-cu-serie" ? serie : null,
-      cantitate: tip === "scula-cu-serie" ? 1 : (tip === "scula-primara" ? cantitate : 1), // Force 1 for "scula-cu-serie"
+      cantitate: tip === "scula-cu-serie" ? 1 : (tip === "scula-primara" ? cantitate : 1),
       data_achizicie,
       garantie_expira: tip === "scula-cu-serie" ? garantie_expira : null,
       pret_achizicie,
@@ -87,6 +87,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Updated Excel Export Route
 router.get("/export/excel", async (req, res) => {
   try {
     const tools = await Tool.find();
@@ -95,15 +96,14 @@ router.get("/export/excel", async (req, res) => {
       return res.status(404).json({ error: "Nu există scule de exportat." });
     }
 
-    // Fetch all assignments to map tools to employees and quantities
+    // Fetch all assignments with employee and tool details
     const assignments = await AssignedTool.find()
       .populate("id_angajat", "nume")
       .populate("id_scula", "nume");
 
-    // Log the raw assignments for debugging
     console.log("📋 Raw assignments:", assignments);
 
-    // Create a map of tool IDs to their assignments (employee names and quantities), with detailed error handling
+    // Create a map of tool IDs to their assignments
     const toolAssignments = {};
     assignments.forEach((assignment) => {
       if (assignment.id_scula && assignment.id_scula._id) {
@@ -113,10 +113,11 @@ router.get("/export/excel", async (req, res) => {
         }
         toolAssignments[toolId].push({
           employeeName: assignment.id_angajat?.nume || "N/A",
-          quantity: assignment.cantitate_atribuita || 1,
+          quantityAssigned: assignment.cantitate_atribuita || 1,
+          assignmentDate: assignment.data_atribuire,
         });
       } else {
-        console.error("❌ Invalid assignment found - missing or null id_scula:", {
+        console.error("❌ Invalid assignment found:", {
           assignmentId: assignment._id,
           id_scula: assignment.id_scula,
           id_angajat: assignment.id_angajat,
@@ -127,7 +128,7 @@ router.get("/export/excel", async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Inventar");
 
-    // Definim capetele de tabel (match table headers in ToolList.js, including "Atribuită la")
+    // Define updated table headers including new columns
     worksheet.columns = [
       { header: "Nume", key: "nume", width: 20 },
       { header: "Serie", key: "serie", width: 20 },
@@ -135,16 +136,33 @@ router.get("/export/excel", async (req, res) => {
       { header: "Data Achiziției", key: "data_achizicie", width: 20 },
       { header: "Garanție Expiră", key: "garantie_expira", width: 20 },
       { header: "Preț Achiziție", key: "pret_achizicie", width: 15 },
-      { header: "Atribuită la", key: "assignedTo", width: 30 }, // New column for assignments
+      { header: "Atribuită la", key: "assignedTo", width: 30 },
+      { header: "Cantitate Atribuită", key: "cantitate_atribuita", width: 15 }, // New column
+      { header: "Cantitate Totală", key: "cantitate_totala", width: 15 }, // New column
+      { header: "Data Atribuire", key: "data_atribuire", width: 20 }, // New column
     ];
 
-    // Adăugăm datele în tabel, including assigned employees and quantities, with error handling for tool IDs
+    // Add data to the table with new fields
     tools.forEach((tool) => {
       const toolId = tool._id.toString();
       const assignmentsForTool = toolAssignments[toolId] || [];
       const assignedTo = assignmentsForTool.length > 0
-        ? assignmentsForTool.map((a) => `${a.employeeName} (${a.quantity} atribuite)`).join(", ")
+        ? assignmentsForTool.map((a) => `${a.employeeName} (${a.quantityAssigned} atribuite)`).join(", ")
         : "Neatribuită";
+
+      // Calculate total assigned quantity for this tool
+      const cantitateAtribuita = assignmentsForTool.reduce(
+        (sum, assignment) => sum + assignment.quantityAssigned,
+        0
+      );
+
+      // Calculate total quantity (inventory + assigned)
+      const cantitateTotala = (tool.cantitate || 0) + cantitateAtribuita;
+
+      // Get the most recent assignment date (if any)
+      const dataAtribuire = assignmentsForTool.length > 0
+        ? new Date(Math.max(...assignmentsForTool.map(a => new Date(a.assignmentDate)))).toISOString().split("T")[0]
+        : "N/A";
 
       worksheet.addRow({
         nume: tool.nume || "N/A",
@@ -153,15 +171,15 @@ router.get("/export/excel", async (req, res) => {
         data_achizicie: tool.data_achizicie ? new Date(tool.data_achizicie).toISOString().split("T")[0] : "N/A",
         garantie_expira: tool.garantie_expira ? new Date(tool.garantie_expira).toISOString().split("T")[0] : "N/A",
         pret_achizicie: tool.pret_achizicie || 0,
-        assignedTo: assignedTo, // Include assigned employees and quantities
+        assignedTo: assignedTo,
+        cantitate_atribuita: cantitateAtribuita, // New field
+        cantitate_totala: cantitateTotala, // New field
+        data_atribuire: dataAtribuire, // New field
       });
     });
 
-    // Salvăm fișierul în buffer și trimitem la utilizator
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=Inventar.xlsx"
-    );
+    // Set headers and send the file
+    res.setHeader("Content-Disposition", "attachment; filename=Inventar.xlsx");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -172,21 +190,15 @@ router.get("/export/excel", async (req, res) => {
   }
 });
 
-// 📌 Ruta pentru obținerea doar a sculelor neatribuite
-// Route to get only unassigned tools
-// 🔹 Ruta GET pentru sculele neatribuite
-// 🔹 Get unassigned tools
+// Ruta pentru obținerea sculelor neatribuite
 router.get("/unassigned", async (req, res) => {
   try {
-    // Get all assigned tool IDs where returnat is false
     const assignedTools = await AssignedTool.find({ returnat: false }).distinct("id_scula");
-
-    // Find tools that are not assigned (or returned)
     const unassignedTools = await Tool.find({
-      _id: { $nin: assignedTools }, // Exclude currently assigned tools
+      _id: { $nin: assignedTools },
       $or: [
-        { tip: "scula-primara", cantitate: { $gt: 0 } }, // Primary tools with quantity
-        { tip: "scula-cu-serie" } // Serial tools (assume available if not assigned)
+        { tip: "scula-primara", cantitate: { $gt: 0 } },
+        { tip: "scula-cu-serie" }
       ]
     });
 
