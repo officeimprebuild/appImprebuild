@@ -4,12 +4,11 @@ const AssignedTool = require("../models/AssignedTool");
 const Employee = require("../models/Employee");
 const Tool = require("../models/Tool");
 
-// 📌 1️⃣ Atribuie o sculă unui angajat
+// Atribuie o sculă unui angajat
 router.post("/", async (req, res) => {
   try {
     const { id_angajat, id_scula, cantitate_atribuita } = req.body;
 
-    // Validate input
     if (!id_angajat || !id_scula || !cantitate_atribuita || cantitate_atribuita <= 0) {
       return res.status(400).json({ message: "Invalid data for tool assignment. Quantity must be greater than 0." });
     }
@@ -20,17 +19,14 @@ router.post("/", async (req, res) => {
     if (!employee) return res.status(404).json({ message: "Angajatul nu a fost găsit!" });
     if (!tool) return res.status(404).json({ message: "Scula nu a fost găsită!" });
 
-    // Force quantity to 1 for serialized tools
     const finalQuantity = tool.tip === "scula-cu-serie" ? 1 : cantitate_atribuita;
 
-    // Check if enough quantity is available
     if (tool.cantitate < finalQuantity) {
       return res.status(400).json({ 
         message: `Cantitate insuficientă în inventar! Disponibil: ${tool.cantitate}, Cerut: ${finalQuantity}` 
       });
     }
 
-    // Create new assignment
     const newAssignedTool = new AssignedTool({
       id_angajat,
       id_scula,
@@ -39,7 +35,6 @@ router.post("/", async (req, res) => {
     });
     await newAssignedTool.save();
 
-    // Reduce available quantity in inventory
     tool.cantitate -= finalQuantity;
     await tool.save();
 
@@ -50,35 +45,35 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 📌 2️⃣ Obține toate sculele atribuite
+// Obține toate sculele atribuite
 router.get("/", async (req, res) => {
   try {
     const assignedTools = await AssignedTool.find()
       .populate("id_angajat", "nume telefon companie")
       .populate("id_scula", "nume serie cantitate")
-      .select("id_angajat id_scula cantitate_atribuita serie data_atribuire"); // Add cantitate_atribuita
+      .select("id_angajat id_scula cantitate_atribuita serie data_atribuire");
     res.json(assignedTools.filter(a => a.id_angajat && a.id_scula));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// 📌 3️⃣ Obține toate sculele atribuite unui angajat
+// Obține toate sculele atribuite unui angajat
 router.get("/employee/:id", async (req, res) => {
   try {
     const assignedTools = await AssignedTool.find({ id_angajat: req.params.id })
       .populate("id_scula", "nume serie cantitate")
-      .select("id_scula cantitate_atribuita serie data_atribuire"); // Add cantitate_atribuita
+      .select("id_scula cantitate_atribuita serie data_atribuire");
     res.json(assignedTools);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// 📌 4️⃣ Returnează o sculă
+// Returnează sau șterge o sculă
 router.post("/return", async (req, res) => {
   try {
-    const { angajatId, sculaId, cantitate_atribuita } = req.body;
+    const { angajatId, sculaId, cantitate_atribuita, action } = req.body;
     console.log("📥 Cerere returnare primită:", req.body);
 
     const assignedTool = await AssignedTool.findOne({ id_angajat: angajatId, id_scula: sculaId });
@@ -87,18 +82,17 @@ router.post("/return", async (req, res) => {
     }
 
     const tool = await Tool.findById(sculaId);
-    let returnQuantity;
+    let returnQuantity = cantitate_atribuita;
 
     if (tool.tip === "scula-cu-serie") {
-      returnQuantity = 1; // Fixed quantity for serialized tools, no validation needed
+      returnQuantity = 1; // Fixed quantity for serialized tools
     } else if (tool.tip === "scula-primara") {
-      returnQuantity = cantitate_atribuita;
       if (!returnQuantity || returnQuantity <= 0) {
-        return res.status(400).json({ message: "Cantitatea de returnat trebuie să fie mai mare decât 0!" });
+        return res.status(400).json({ message: "Cantitatea de returnat/șters trebuie să fie mai mare decât 0!" });
       }
       if (returnQuantity > assignedTool.cantitate_atribuita) {
         return res.status(400).json({
-          message: `Nu poți returna mai mult decât ai atribuit! Atribuit: ${assignedTool.cantitate_atribuita}, Cerut: ${returnQuantity}`,
+          message: `Nu poți returna/șterge mai mult decât ai atribuit! Atribuit: ${assignedTool.cantitate_atribuita}, Cerut: ${returnQuantity}`,
         });
       }
     } else {
@@ -107,21 +101,53 @@ router.post("/return", async (req, res) => {
 
     console.log("🔍 Calcul returnQuantity:", { returnQuantity, assignedToolCantitate: assignedTool.cantitate_atribuita });
 
-    if (returnQuantity === assignedTool.cantitate_atribuita) {
-      await AssignedTool.findOneAndDelete({ id_angajat: angajatId, id_scula: sculaId });
-      console.log("🗑️ Atribuire ștearsă");
-    } else if (tool.tip === "scula-primara") { // Only update for scula-primara
-      assignedTool.cantitate_atribuita -= returnQuantity;
-      await assignedTool.save();
-      console.log("✂️ Atribuire actualizată:", assignedTool.cantitate_atribuita);
+    if (action === "delete") {
+      // Partial deletion for scula-primara, full deletion for scula-cu-serie
+      if (tool.tip === "scula-cu-serie") {
+        // Delete the entire tool and assignment for serialized tools
+        await Tool.findByIdAndDelete(sculaId);
+        await AssignedTool.findOneAndDelete({ id_angajat: angajatId, id_scula: sculaId });
+        console.log("🗑️ Sculă cu serie ștearsă permanent din inventar și atribuire");
+        res.status(200).json({ message: "Scula cu serie a fost ștearsă permanent cu succes!" });
+      } else if (tool.tip === "scula-primara") {
+        // Reduce inventory quantity by returnQuantity and update assignment
+        tool.cantitate -= returnQuantity;
+        await tool.save();
+        console.log("📈 Inventar actualizat pentru scula-primara (ștersă cantitate specifică):", tool.cantitate);
+
+        if (returnQuantity === assignedTool.cantitate_atribuita) {
+          await AssignedTool.findOneAndDelete({ id_angajat: angajatId, id_scula: sculaId });
+          console.log("🗑️ Atribuire ștearsă complet pentru scula-primara");
+        } else {
+          assignedTool.cantitate_atribuita -= returnQuantity;
+          await assignedTool.save();
+          console.log("✂️ Atribuire actualizată pentru scula-primara:", assignedTool.cantitate_atribuita);
+        }
+        res.status(200).json({ message: `Scula primară a fost ștearsă (cantitate: ${returnQuantity}) cu succes!` });
+      }
+    } else if (action === "return") {
+      // Return to inventory logic
+      if (returnQuantity === assignedTool.cantitate_atribuita) {
+        await AssignedTool.findOneAndDelete({ id_angajat: angajatId, id_scula: sculaId });
+        console.log("🗑️ Atribuire ștearsă");
+      } else if (tool.tip === "scula-primara") {
+        assignedTool.cantitate_atribuita -= returnQuantity;
+        await assignedTool.save();
+        console.log("✂️ Atribuire actualizată:", assignedTool.cantitate_atribuita);
+      }
+
+      const updatedTool = await Tool.findByIdAndUpdate(
+        sculaId,
+        { $inc: { cantitate: returnQuantity } },
+        { new: true }
+      );
+      console.log("📈 Inventar actualizat:", updatedTool.cantitate);
+      res.status(200).json({ message: "Scula a fost returnată cu succes!" });
+    } else {
+      return res.status(400).json({ message: "Acțiune invalidă!" });
     }
-
-    const updatedTool = await Tool.findByIdAndUpdate(sculaId, { $inc: { cantitate: returnQuantity } }, { new: true });
-    console.log("📈 Inventar actualizat:", updatedTool.cantitate);
-
-    res.status(200).json({ message: "Scula a fost returnată cu succes!" });
   } catch (error) {
-    console.error("Eroare la returnarea sculei:", error);
+    console.error("Eroare la procesarea sculei:", error);
     res.status(500).json({ error: error.message });
   }
 });
