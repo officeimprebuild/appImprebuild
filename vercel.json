@@ -6,18 +6,8 @@
         "use": "@vercel/static-build",
         "config": { "distDir": "build" }
       }
-      // Îndepărtează secțiunea pentru backend:
-      // {
-      //   "src": "backend/server.js",
-      //   "use": "@vercel/node"
-      // }
     ],
     "routes": [
-      // Îndepărtează ruta pentru backend:
-      // {
-      //   "src": "/api/(.*)",
-      //   "dest": "backend/server.js"
-      // },
       {
         "src": "/(.*)",
         "dest": "frontend/build/index.html"
