@@ -3,8 +3,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Form, Button, Modal } from "react-bootstrap";
 import axios from "axios";
+import "../styles/AddToolForm.css"; // New CSS file
 
-const AddToolForm = ({ onToolAdded }) => {
+const AddToolForm = ({ onToolAdded, buttonColor = "success" }) => {
   const [show, setShow] = useState(false);
   const [formData, setFormData] = useState({
     nume: "",
@@ -51,16 +52,15 @@ const AddToolForm = ({ onToolAdded }) => {
     e.preventDefault();
     const formattedData = {
       ...formData,
-      cantitate: formData.tip === "scula-cu-serie" ? 1 : Number(formData.cantitate), // Force 1 for "scula-cu-serie"
+      cantitate: formData.tip === "scula-cu-serie" ? 1 : Number(formData.cantitate),
       pret_achizicie: Number(formData.pret_achizicie),
       data_achizicie: formData.data_achizicie.toISOString(),
       garantie_expira: formData.tip === "scula-cu-serie" ? formData.garantie_expira.toISOString() : null,
       serie: formData.tip === "scula-cu-serie" ? formData.serie : null,
     };
-  
-    console.log("Date trimise către server:", formattedData);
-  
-    axios.post("http://localhost:5000/api/tools", formattedData)
+
+    axios
+      .post("http://localhost:5000/api/tools", formattedData)
       .then(() => {
         onToolAdded();
         setShow(false);
@@ -81,11 +81,11 @@ const AddToolForm = ({ onToolAdded }) => {
 
   return (
     <>
-      <Button variant="success" className="mb-3 ml-3" onClick={() => setShow(true)}>
+      <Button variant={buttonColor} className="mb-3" onClick={() => setShow(true)}>
         + Adaugă Sculă în inventar
       </Button>
 
-      <Modal show={show} onHide={() => setShow(false)}>
+      <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Adaugă Sculă</Modal.Title>
         </Modal.Header>
@@ -93,7 +93,13 @@ const AddToolForm = ({ onToolAdded }) => {
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Nume</Form.Label>
-              <Form.Control type="text" name="nume" value={formData.nume} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="nume"
+                value={formData.nume}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -108,7 +114,12 @@ const AddToolForm = ({ onToolAdded }) => {
               <>
                 <Form.Group className="mb-3">
                   <Form.Label>Serie</Form.Label>
-                  <Form.Control type="text" name="serie" value={formData.serie} onChange={handleChange} />
+                  <Form.Control
+                    type="text"
+                    name="serie"
+                    value={formData.serie}
+                    onChange={handleChange}
+                  />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Garanție Expiră</Form.Label>
@@ -125,7 +136,13 @@ const AddToolForm = ({ onToolAdded }) => {
             {formData.tip === "scula-primara" && (
               <Form.Group className="mb-3">
                 <Form.Label>Cantitate</Form.Label>
-                <Form.Control type="number" name="cantitate" value={formData.cantitate} onChange={handleChange} min="1" />
+                <Form.Control
+                  type="number"
+                  name="cantitate"
+                  value={formData.cantitate}
+                  onChange={handleChange}
+                  min="1"
+                />
               </Form.Group>
             )}
 
@@ -141,10 +158,18 @@ const AddToolForm = ({ onToolAdded }) => {
 
             <Form.Group className="mb-3">
               <Form.Label>Preț Achiziție</Form.Label>
-              <Form.Control type="number" name="pret_achizicie" value={formData.pret_achizicie} onChange={handleChange} required />
+              <Form.Control
+                type="number"
+                name="pret_achizicie"
+                value={formData.pret_achizicie}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
 
-            <Button variant="success" type="submit">Salvează</Button>
+            <Button variant={buttonColor} type="submit" className="w-100">
+              Salvează
+            </Button>
           </Form>
         </Modal.Body>
       </Modal>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Form, Button, Modal } from "react-bootstrap";
+import "../styles/AddEmployeeForm.css"; // New CSS file
 
 const AddEmployeeForm = ({ onEmployeeAdded }) => {
   const [show, setShow] = useState(false);
@@ -14,19 +15,18 @@ const AddEmployeeForm = ({ onEmployeeAdded }) => {
     status: true,
   });
 
-  // 📌 Funcție pentru gestionarea schimbărilor în formular
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // 📌 Funcție pentru trimiterea datelor la backend
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post("http://localhost:5000/api/employees", formData)
+    axios
+      .post("http://localhost:5000/api/employees", formData)
       .then(() => {
-        onEmployeeAdded(); // Reîmprospătează lista de angajați
-        setShow(false); // Închide formularul
+        onEmployeeAdded();
+        setShow(false);
         setFormData({
           nume: "",
           telefon: "",
@@ -42,11 +42,11 @@ const AddEmployeeForm = ({ onEmployeeAdded }) => {
 
   return (
     <>
-      <Button variant="primary" className="mb-3" onClick={() => setShow(true)}>
+      <Button variant="purple" className="mb-3" onClick={() => setShow(true)}>
         + Adaugă Angajat
       </Button>
 
-      <Modal show={show} onHide={() => setShow(false)}>
+      <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Adaugă Angajat</Modal.Title>
         </Modal.Header>
@@ -54,27 +54,59 @@ const AddEmployeeForm = ({ onEmployeeAdded }) => {
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Nume</Form.Label>
-              <Form.Control type="text" name="nume" value={formData.nume} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="nume"
+                value={formData.nume}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Telefon</Form.Label>
-              <Form.Control type="text" name="telefon" value={formData.telefon} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="telefon"
+                value={formData.telefon}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Companie</Form.Label>
-              <Form.Control type="text" name="companie" value={formData.companie} onChange={handleChange} />
+              <Form.Control
+                type="text"
+                name="companie"
+                value={formData.companie}
+                onChange={handleChange}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Mărime Tricou</Form.Label>
-              <Form.Control type="text" name="marime_tricou" value={formData.marime_tricou} onChange={handleChange} />
+              <Form.Control
+                type="text"
+                name="marime_tricou"
+                value={formData.marime_tricou}
+                onChange={handleChange}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Mărime Pantaloni</Form.Label>
-              <Form.Control type="text" name="marime_pantaloni" value={formData.marime_pantaloni} onChange={handleChange} />
+              <Form.Control
+                type="text"
+                name="marime_pantaloni"
+                value={formData.marime_pantaloni}
+                onChange={handleChange}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Măsură Bocanci</Form.Label>
-              <Form.Control type="text" name="masura_bocanci" value={formData.masura_bocanci} onChange={handleChange} />
+              <Form.Control
+                type="text"
+                name="masura_bocanci"
+                value={formData.masura_bocanci}
+                onChange={handleChange}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Status</Form.Label>
@@ -83,7 +115,7 @@ const AddEmployeeForm = ({ onEmployeeAdded }) => {
                 <option value={false}>Inactiv</option>
               </Form.Select>
             </Form.Group>
-            <Button variant="success" type="submit">
+            <Button variant="purple" type="submit" className="w-100">
               Salvează
             </Button>
           </Form>

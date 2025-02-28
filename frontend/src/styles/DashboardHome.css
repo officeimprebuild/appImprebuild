@@ -1,0 +1,58 @@
+.dashboard-home-container {
+    padding: 1rem;
+  }
+  
+  .dashboard-home-container h2 {
+    font-size: 1.75rem;
+    color: #343a40;
+  }
+  
+  .dashboard-home-container p {
+    font-size: 1rem;
+    color: #6c757d;
+  }
+  
+  .dashboard-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    transition: transform 0.2s ease;
+  }
+  
+  .dashboard-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .dashboard-card .card-title {
+    font-size: 1.25rem;
+    color: #343a40;
+  }
+  
+  .dashboard-card .card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .text-purple {
+    color: #6f42c1; /* Matches AddEmployeeForm purple */
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 576px) {
+    .dashboard-home-container h2 {
+      font-size: 1.2rem;
+    }
+    .dashboard-home-container p {
+      font-size: 0.9rem;
+    }
+    .dashboard-card {
+      margin-bottom: 1rem;
+    }
+    .dashboard-card .card-title {
+      font-size: 1.1rem;
+    }
+    .dashboard-card .card-text {
+      font-size: 0.85rem;
+    }
+  }

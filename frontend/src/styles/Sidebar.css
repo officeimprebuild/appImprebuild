@@ -1,0 +1,25 @@
+.sidebar {
+    background-color: #212529; /* Matches Bootstrap's bg-dark */
+    width: 250px; /* Fixed width for desktop */
+    height: 100%; /* Full height within container */
+  }
+  
+  .sidebar .nav-link {
+    padding: 10px 15px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sidebar .nav-link:hover {
+    background-color: #343a40; /* Slightly lighter on hover */
+  }
+  
+  .sidebar .nav-link.active {
+    background-color: #007bff; /* Highlight active link */
+  }
+  
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%; /* Full width when open on mobile */
+    }
+  }

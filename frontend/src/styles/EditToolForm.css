@@ -1,0 +1,15 @@
+.modal-body .form-control,
+.modal-body .form-select {
+  font-size: 0.9rem;
+}
+
+.modal-body .btn {
+  padding: 8px 16px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+}

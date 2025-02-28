@@ -1,0 +1,15 @@
+.employees-container {
+    padding: 1rem;
+  }
+  
+  .employees-container h2 {
+    font-size: 1.75rem;
+    color: #343a40;
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 576px) {
+    .employees-container h2 {
+      font-size: 1.2rem;
+    }
+  }

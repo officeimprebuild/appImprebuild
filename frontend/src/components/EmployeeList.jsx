@@ -1,30 +1,33 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Button } from "react-bootstrap";
+import { Button, Card, Col, Row } from "react-bootstrap";
+import { FaEdit, FaTrash, FaDownload } from "react-icons/fa";
 import EditEmployeeForm from "./EditEmployeeForm";
+import "../styles/EmployeeList.css";
 
 const EmployeeList = ({ onEmployeeUpdated }) => {
   const [employees, setEmployees] = useState([]);
   const [assignedTools, setAssignedTools] = useState({});
+  const [editEmployee, setEditEmployee] = useState(null); // For modal
   const currentDate = new Date().toLocaleDateString("ro-RO").replace(/\//g, "-");
 
   useEffect(() => {
     fetchEmployees();
-  }, []);
+  }, [onEmployeeUpdated]);
 
   const fetchEmployees = () => {
-    axios.get("http://localhost:5000/api/employees")
+    axios
+      .get("http://localhost:5000/api/employees")
       .then((response) => {
         setEmployees(response.data);
         fetchAssignedTools();
       })
-      .catch((error) => {
-        console.error("Eroare la preluarea angajaților:", error);
-      });
+      .catch((error) => console.error("Eroare la preluarea angajaților:", error));
   };
 
   const fetchAssignedTools = () => {
-    axios.get("http://localhost:5000/api/assigned-tools")
+    axios
+      .get("http://localhost:5000/api/assigned-tools")
       .then((response) => {
         const toolsByEmployee = {};
         response.data.forEach((assignment) => {
@@ -37,26 +40,26 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
         });
         setAssignedTools(toolsByEmployee);
       })
-      .catch((error) => {
-        console.error("Eroare la preluarea sculelor atribuite:", error);
-      });
+      .catch((error) => console.error("Eroare la preluarea sculelor atribuite:", error));
   };
 
   const handleDelete = (id) => {
     if (window.confirm("Sigur vrei să ștergi acest angajat?")) {
-      axios.delete(`http://localhost:5000/api/employees/${id}`)
+      axios
+        .delete(`http://localhost:5000/api/employees/${id}`)
         .then(() => {
           fetchEmployees();
-          onEmployeeUpdated();
+          if (onEmployeeUpdated) onEmployeeUpdated();
         })
         .catch((error) => console.error("Eroare la ștergere:", error));
     }
   };
 
   const handleExport = (employee) => {
-    axios.get(`http://localhost:5000/api/export/employee/${employee._id}`, {
-      responseType: "blob",
-    })
+    axios
+      .get(`http://localhost:5000/api/export/employee/${employee._id}`, {
+        responseType: "blob",
+      })
       .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
@@ -70,52 +73,73 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="employee-list-container mt-3">
       <h2 className="mb-4">Lista Angajaților</h2>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Nume</th>
-            <th>Telefon</th>
-            <th>Companie</th>
-            <th>Status</th>
-            <th>Scule Atribuite</th>
-            <th>Acțiuni</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.length > 0 ? (
-            employees.map((employee) => (
-              <tr key={employee._id}>
-                <td>{employee.nume}</td>
-                <td>{employee.telefon}</td>
-                <td>{employee.companie || "N/A"}</td>
-                <td>{employee.status ? "Activ" : "Inactiv"}</td>
-                <td>
-                  {assignedTools[employee._id]?.length > 0 ? (
-                    assignedTools[employee._id].join(" | ")
-                  ) : (
-                    <span className="text-muted">Nicio sculă atribuită</span>
-                  )}
-                </td>
-                <td>
-                  <EditEmployeeForm employee={employee} onEmployeeUpdated={fetchEmployees} />
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(employee._id)} className="ms-2">
-                    Șterge
-                  </Button>
-                  <Button variant="success" size="sm" onClick={() => handleExport(employee)} className="ms-2">
-                    Exportă
-                  </Button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="text-center">Niciun angajat găsit.</td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+      <Row>
+        {employees.length > 0 ? (
+          employees.map((employee) => (
+            <Col key={employee._id} md={4} sm={6} xs={12} className="mb-4">
+              <Card className="employee-card">
+                <Card.Body>
+                  <Card.Title>{employee.nume}</Card.Title>
+                  <Card.Text>
+                    <strong>Telefon:</strong> {employee.telefon}<br />
+                    <strong>Companie:</strong> {employee.companie || "N/A"}<br />
+                    <strong>Status:</strong> {employee.status ? "Activ" : "Inactiv"}<br />
+                    <strong>Scule Atribuite:</strong>{" "}
+                    {assignedTools[employee._id]?.length > 0 ? (
+                      assignedTools[employee._id].join(" | ")
+                    ) : (
+                      <span className="text-muted">Nicio sculă atribuită</span>
+                    )}
+                  </Card.Text>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      onClick={() => setEditEmployee(employee)}
+                      title="Editează"
+                    >
+                      <FaEdit />
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(employee._id)}
+                      title="Șterge"
+                    >
+                      <FaTrash />
+                    </Button>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => handleExport(employee)}
+                      title="Exportă"
+                    >
+                      <FaDownload />
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+              {editEmployee && editEmployee._id === employee._id && (
+                <EditEmployeeForm
+                  employee={editEmployee}
+                  onEmployeeUpdated={() => {
+                    fetchEmployees();
+                    setEditEmployee(null);
+                  }}
+                  show={editEmployee && editEmployee._id === employee._id}
+                  onHide={() => setEditEmployee(null)}
+                />
+              )}
+            </Col>
+          ))
+        ) : (
+          <Col>
+            <p className="text-center">Niciun angajat găsit.</p>
+          </Col>
+        )}
+      </Row>
     </div>
   );
 };

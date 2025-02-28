@@ -1,0 +1,35 @@
+.add-assigned-tool-container .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    width: 100%; /* Full width on mobile, adjusted by Col in desktop */
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-assigned-tool-container .btn:hover {
+    opacity: 0.9; /* Subtle hover effect */
+  }
+  
+  .modal-body .form-control,
+  .modal-body .form-select {
+    font-size: 0.9rem;
+  }
+  
+  .modal-body .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    width: 100%; /* Full-width buttons in modals */
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 576px) {
+    .add-assigned-tool-container .d-flex {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .modal-dialog {
+      margin: 1rem;
+    }
+    .modal-body .btn {
+      font-size: 0.9rem; /* Slightly smaller on mobile */
+    }
+  }

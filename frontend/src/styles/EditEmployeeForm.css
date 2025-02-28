@@ -1,0 +1,27 @@
+/* Custom purple variant (shared with AddEmployeeForm) */
+.btn-purple {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+  }
+  
+  .btn-purple:hover {
+    background-color: #563d7c;
+    border-color: #563d7c;
+  }
+  
+  .modal-body .form-control,
+  .modal-body .form-select {
+    font-size: 0.9rem;
+  }
+  
+  .modal-body .btn {
+    padding: 8px 16px;
+  }
+  
+  /* Mobile adjustments */
+  @media (max-width: 576px) {
+    .modal-dialog {
+      margin: 1rem;
+    }
+  }

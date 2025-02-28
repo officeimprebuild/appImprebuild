@@ -1,48 +1,32 @@
 import { useState } from "react";
+import { Container, Row, Col } from "react-bootstrap";
 import ToolList from "../components/ToolList";
 import AddToolForm from "../components/AddToolForm";
 import AddAssignedToolForm from "../components/AddAssignedToolForm";
-import { Container, Button } from "react-bootstrap";
+import "../styles/Tools.css"; // New CSS file
 
 const Tools = () => {
   const [refresh, setRefresh] = useState(false);
 
-  const handleToolAdded = () => {
-    setRefresh(!refresh); // Reîmprospătează lista de scule
-  };
-
-  const handleToolAssigned = () => {
-    setRefresh(!refresh); // Reîmprospătează lista de scule atribuite
-  };
+  const handleToolAdded = () => setRefresh(!refresh);
+  const handleToolAssigned = () => setRefresh(!refresh);
 
   return (
-    <Container fluid className="mt-2 p-2">
-      <h2 className="mb-3 text-center">Gestionare Scule</h2>
+    <Container fluid className="tools-container mt-2 p-2">
+      <h2 className="mb-4 text-center">Gestionare Scule</h2>
 
-      {/* Buttons for forms, ordered as requested */}
-      
+      {/* Forms in a responsive grid */}
+      <Row className="mb-4">
+        <Col md={6} className="mb-3 mb-md-0">
+          <AddToolForm onToolAdded={handleToolAdded} buttonColor="success" />
+        </Col>
+        <Col md={6}>
+          <AddAssignedToolForm onToolAssigned={handleToolAssigned} buttonColor="primary" />
+        </Col>
+      </Row>
 
-      {/* Forms rendered directly */}
-      <AddToolForm onToolAdded={handleToolAdded} />
-      <AddAssignedToolForm onToolAssigned={handleToolAssigned} />
-
-      {/* Lista sculelor */}
+      {/* Tool List */}
       <ToolList key={refresh} onToolUpdated={handleToolAdded} />
-
-      <style jsx>{`
-        @media (max-width: 576px) {
-          h2 {
-            font-size: 1.2rem;
-          }
-          .btn {
-            font-size: 0.9rem;
-            padding: 8px 16px;
-          }
-          .gap-2 {
-            gap: 1rem;
-          }
-        }
-      `}</style>
     </Container>
   );
 };

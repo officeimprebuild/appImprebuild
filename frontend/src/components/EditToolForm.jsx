@@ -3,9 +3,9 @@ import axios from "axios";
 import { Form, Button, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import "../styles/EditToolForm.css"; // New CSS file
 
-const EditToolForm = ({ tool, onToolUpdated }) => {
-  const [show, setShow] = useState(false);
+const EditToolForm = ({ tool, onToolUpdated, show, onHide }) => {
   const [formData, setFormData] = useState({
     nume: "",
     tip: "scula-cu-serie",
@@ -16,7 +16,6 @@ const EditToolForm = ({ tool, onToolUpdated }) => {
     pret_achizicie: 0,
   });
 
-  // Actualizează formData când tool se schimbă
   useEffect(() => {
     if (tool) {
       setFormData({
@@ -26,7 +25,7 @@ const EditToolForm = ({ tool, onToolUpdated }) => {
         cantitate: tool.cantitate,
         data_achizicie: new Date(tool.data_achizicie),
         garantie_expira: tool.garantie_expira ? new Date(tool.garantie_expira) : null,
-        pret_achizicie: tool.pret_achizicie,
+        pret_achizicie: tool.pret_achizitie,
       });
     }
   }, [tool]);
@@ -38,7 +37,6 @@ const EditToolForm = ({ tool, onToolUpdated }) => {
       [name]: value,
     }));
 
-    // Dacă tipul este schimbat, ajustează câmpurile corespunzător
     if (name === "tip") {
       if (value === "scula-primara") {
         setFormData((prevData) => ({
@@ -77,84 +75,101 @@ const EditToolForm = ({ tool, onToolUpdated }) => {
     axios
       .put(`http://localhost:5000/api/tools/${tool._id}`, formattedData)
       .then(() => {
-        onToolUpdated(); // Reîmprospătează lista de scule
-        setShow(false); // Închide modalul
+        onToolUpdated();
+        onHide(); // Close modal via ToolList
       })
       .catch((error) => console.error("Eroare la editarea sculei:", error));
   };
 
   return (
-    <>
-      <Button variant="warning" size="sm" onClick={() => setShow(true)}>
-        Editează
-      </Button>
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Editează Sculă</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Nume</Form.Label>
+            <Form.Control
+              type="text"
+              name="nume"
+              value={formData.nume}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-      <Modal show={show} onHide={() => setShow(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Editează Sculă</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Nume</Form.Label>
-              <Form.Control type="text" name="nume" value={formData.nume} onChange={handleChange} required />
-            </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Tip</Form.Label>
+            <Form.Control as="select" name="tip" value={formData.tip} onChange={handleChange}>
+              <option value="scula-cu-serie">Sculă cu serie</option>
+              <option value="scula-primara">Sculă primară</option>
+            </Form.Control>
+          </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Tip</Form.Label>
-              <Form.Control as="select" name="tip" value={formData.tip} onChange={handleChange}>
-                <option value="scula-cu-serie">Sculă cu serie</option>
-                <option value="scula-primara">Sculă primară</option>
-              </Form.Control>
-            </Form.Group>
-
-            {formData.tip === "scula-cu-serie" && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Serie</Form.Label>
-                  <Form.Control type="text" name="serie" value={formData.serie} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Garanție Expiră</Form.Label>
-                  <DatePicker
-                    selected={formData.garantie_expira}
-                    onChange={(date) => handleDateChange(date, "garantie_expira")}
-                    dateFormat="yyyy-MM-dd"
-                    className="form-control"
-                  />
-                </Form.Group>
-              </>
-            )}
-
-            {formData.tip === "scula-primara" && (
+          {formData.tip === "scula-cu-serie" && (
+            <>
               <Form.Group className="mb-3">
-                <Form.Label>Cantitate</Form.Label>
-                <Form.Control type="number" name="cantitate" value={formData.cantitate} onChange={handleChange} min="1" />
+                <Form.Label>Serie</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="serie"
+                  value={formData.serie}
+                  onChange={handleChange}
+                />
               </Form.Group>
-            )}
+              <Form.Group className="mb-3">
+                <Form.Label>Garanție Expiră</Form.Label>
+                <DatePicker
+                  selected={formData.garantie_expira}
+                  onChange={(date) => handleDateChange(date, "garantie_expira")}
+                  dateFormat="yyyy-MM-dd"
+                  className="form-control"
+                />
+              </Form.Group>
+            </>
+          )}
 
+          {formData.tip === "scula-primara" && (
             <Form.Group className="mb-3">
-              <Form.Label>Data Achiziției</Form.Label>
-              <DatePicker
-                selected={formData.data_achizicie}
-                onChange={(date) => handleDateChange(date, "data_achizicie")}
-                dateFormat="yyyy-MM-dd"
-                className="form-control"
+              <Form.Label>Cantitate</Form.Label>
+              <Form.Control
+                type="number"
+                name="cantitate"
+                value={formData.cantitate}
+                onChange={handleChange}
+                min="1"
               />
             </Form.Group>
+          )}
 
-            <Form.Group className="mb-3">
-              <Form.Label>Preț Achiziție</Form.Label>
-              <Form.Control type="number" name="pret_achizicie" value={formData.pret_achizicie} onChange={handleChange} required />
-            </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Data Achiziției</Form.Label>
+            <DatePicker
+              selected={formData.data_achizicie}
+              onChange={(date) => handleDateChange(date, "data_achizicie")}
+              dateFormat="yyyy-MM-dd"
+              className="form-control"
+            />
+          </Form.Group>
 
-            <Button variant="success" type="submit">
-              Salvează
-            </Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </>
+          <Form.Group className="mb-3">
+            <Form.Label>Preț Achiziție</Form.Label>
+            <Form.Control
+              type="number"
+              name="pret_achizicie"
+              value={formData.pret_achizicie}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Button variant="success" type="submit" className="w-100">
+            Salvează
+          </Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
   );
 };
 
