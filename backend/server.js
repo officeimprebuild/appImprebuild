@@ -25,5 +25,5 @@ app.use("/api/export", exportRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Serverul rulează pe http://localhost:${PORT}`);
+    console.log(`🚀 Serverul rulează pe ${PORT}`);
 });
