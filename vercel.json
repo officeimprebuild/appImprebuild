@@ -4,21 +4,23 @@
       {
         "src": "frontend/package.json",
         "use": "@vercel/static-build",
-        "config": { "distDir": "dist" }
-      },
-      {
-        "src": "backend/server.js",
-        "use": "@vercel/node"
+        "config": { "distDir": "build" }
       }
+      // Îndepărtează secțiunea pentru backend:
+      // {
+      //   "src": "backend/server.js",
+      //   "use": "@vercel/node"
+      // }
     ],
     "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "backend/server.js"
-      },
+      // Îndepărtează ruta pentru backend:
+      // {
+      //   "src": "/api/(.*)",
+      //   "dest": "backend/server.js"
+      // },
       {
         "src": "/(.*)",
-        "dest": "frontend/dist/index.html"
+        "dest": "frontend/build/index.html"
       }
     ]
   }
