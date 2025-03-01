@@ -17,7 +17,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
-  base: '/', // Ensure this is set correctly, or use '/subpath/' if deployed under a subpath
+  base: './', // Important for relative asset paths
   define: {
     'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:5000'),
   },
