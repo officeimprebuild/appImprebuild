@@ -3,6 +3,8 @@ import axios from "axios";
 import { Form, Button, Modal } from "react-bootstrap";
 import "../styles/EditEmployeeForm.css"; // New CSS file
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const EditEmployeeForm = ({ employee, onEmployeeUpdated, show, onHide }) => {
   const [formData, setFormData] = useState(employee);
 
@@ -28,7 +30,7 @@ const EditEmployeeForm = ({ employee, onEmployeeUpdated, show, onHide }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:5000/api/employees/${employee._id}`, formData)
+      .put(`${API_URL}/api/employees/${employee._id}`, formData)
       .then(() => {
         onEmployeeUpdated();
         onHide(); // Close modal via EmployeeList

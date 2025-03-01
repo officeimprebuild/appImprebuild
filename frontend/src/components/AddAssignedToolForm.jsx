@@ -3,6 +3,8 @@ import { Button, Modal, Form, Container, Col, Alert } from "react-bootstrap";
 import axios from "axios";
 import "../styles/AddAssignedToolForm.css"; // New CSS file
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
   const [show, setShow] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -25,7 +27,7 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/employees");
+      const res = await axios.get(`${API_URL}/api/employees`);
       setEmployees(res.data);
     } catch (err) {
       console.error("❌ Eroare la preluarea angajaților:", err);
@@ -34,7 +36,7 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
 
   const fetchTools = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/tools/unassigned");
+      const res = await axios.get(`${API_URL}/api/tools/unassigned`);
       setTools(res.data);
     } catch (err) {
       console.error("❌ Eroare la preluarea sculelor:", err);
@@ -43,7 +45,7 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
 
   const fetchAssignedTools = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/assigned-tools");
+      const res = await axios.get(`${API_URL}/api/assigned-tools`);
       const toolsByEmployee = {};
       res.data.forEach((assign) => {
         if (assign.id_angajat && assign.id_scula) {
@@ -80,7 +82,7 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
     const finalQuantity = toolType === "scula-cu-serie" ? 1 : selectedQuantity;
 
     try {
-      await axios.post("http://localhost:5000/api/assigned-tools", {
+      await axios.post(`${API_URL}/api/assigned-tools`, {
         id_angajat: selectedEmployee,
         id_scula: selectedTool,
         cantitate_atribuita: finalQuantity,
@@ -118,7 +120,7 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/assigned-tools/return", {
+      await axios.post(`${API_URL}/api/assigned-tools/return`, {
         angajatId: returnEmployee,
         sculaId: returnTool,
         cantitate_atribuita: finalReturnQuantity,

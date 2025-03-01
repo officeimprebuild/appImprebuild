@@ -5,6 +5,8 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import EditToolForm from "./EditToolForm";
 import "../styles/ToolList.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const ToolList = ({ onToolUpdated }) => {
   const [tools, setTools] = useState([]);
   const [assignedEmployees, setAssignedEmployees] = useState({});
@@ -16,7 +18,7 @@ const ToolList = ({ onToolUpdated }) => {
 
   const fetchTools = () => {
     axios
-      .get("http://localhost:5000/api/tools")
+      .get(`${API_URL}/api/tools`)
       .then((response) => {
         setTools(response.data);
         fetchAssignedEmployees();
@@ -26,7 +28,7 @@ const ToolList = ({ onToolUpdated }) => {
 
   const fetchAssignedEmployees = () => {
     axios
-      .get("http://localhost:5000/api/assigned-tools")
+      .get(`${API_URL}/api/assigned-tools`)
       .then((response) => {
         const employeesByTool = {};
         response.data.forEach((assignment) => {
@@ -45,7 +47,7 @@ const ToolList = ({ onToolUpdated }) => {
   const handleDelete = (id) => {
     if (window.confirm("Sigur vrei să ștergi această sculă?")) {
       axios
-        .delete(`http://localhost:5000/api/tools/${id}`)
+        .delete(`${API_URL}/api/tools/${id}`)
         .then(() => {
           fetchTools();
           onToolUpdated();
@@ -56,7 +58,7 @@ const ToolList = ({ onToolUpdated }) => {
 
   const handleExportExcel = () => {
     try {
-      window.location.href = "http://localhost:5000/api/tools/export/excel";
+      window.location.href = `${API_URL}/api/tools/export/excel`;
     } catch (error) {
       console.error("Eroare la exportul în Excel:", error);
     }

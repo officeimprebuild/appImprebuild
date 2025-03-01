@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Form, Button } from "react-bootstrap";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const ExportEmployeeForm = () => {
   const [angajati, setAngajati] = useState([]);
   const [angajatId, setAngajatId] = useState("");
 
   useEffect(() => {
     // Preluăm angajații disponibili
-    axios.get("http://localhost:5000/api/employees")
+    axios.get(`${API_URL}api/employees`)
       .then((response) => setAngajati(response.data))
       .catch((error) => console.error("Eroare la preluarea angajaților:", error));
   }, []);
@@ -17,7 +19,7 @@ const ExportEmployeeForm = () => {
     e.preventDefault();
     // Se trimite ID-ul angajatului ales pentru export
     if (angajatId) {
-      axios.get(`http://localhost:5000/api/export/employee/${angajatId}`)
+      axios.get(`${API_URL}/api/export/employee/${angajatId}`)
         .then((response) => {
           // Logica de descărcare a fișierului Word
           const blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });

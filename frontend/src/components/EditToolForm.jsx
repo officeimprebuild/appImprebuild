@@ -5,6 +5,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/EditToolForm.css"; // New CSS file
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const EditToolForm = ({ tool, onToolUpdated, show, onHide }) => {
   const [formData, setFormData] = useState({
     nume: "",
@@ -73,7 +75,7 @@ const EditToolForm = ({ tool, onToolUpdated, show, onHide }) => {
     };
 
     axios
-      .put(`http://localhost:5000/api/tools/${tool._id}`, formattedData)
+      .put(`${API_URL}/api/tools/${tool._id}`, formattedData)
       .then(() => {
         onToolUpdated();
         onHide(); // Close modal via ToolList

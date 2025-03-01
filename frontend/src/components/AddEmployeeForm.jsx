@@ -3,6 +3,8 @@ import axios from "axios";
 import { Form, Button, Modal } from "react-bootstrap";
 import "../styles/AddEmployeeForm.css"; // New CSS file
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const AddEmployeeForm = ({ onEmployeeAdded }) => {
   const [show, setShow] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +25,7 @@ const AddEmployeeForm = ({ onEmployeeAdded }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/employees", formData)
+      .post(`${API_URL}/api/employees`, formData)
       .then(() => {
         onEmployeeAdded();
         setShow(false);

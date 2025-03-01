@@ -5,6 +5,8 @@ import { Form, Button, Modal } from "react-bootstrap";
 import axios from "axios";
 import "../styles/AddToolForm.css"; // New CSS file
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const AddToolForm = ({ onToolAdded, buttonColor = "success" }) => {
   const [show, setShow] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,7 +62,7 @@ const AddToolForm = ({ onToolAdded, buttonColor = "success" }) => {
     };
 
     axios
-      .post("http://localhost:5000/api/tools", formattedData)
+      .post(`${API_URL}/api/tools`, formattedData)
       .then(() => {
         onToolAdded();
         setShow(false);

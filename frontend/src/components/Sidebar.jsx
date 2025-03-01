@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { FaUser, FaTools, FaHome } from "react-icons/fa";
 import "../styles/Sidebar.css"; // New CSS file
 
+
+
+
 const Sidebar = () => {
   return (
     <div className="sidebar d-flex flex-column text-white p-3">

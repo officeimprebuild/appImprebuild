@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Container, Form, Button, Col, Alert, Modal } from "react-bootstrap";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+
 const ReturnToolForm = ({ onToolReturned }) => {
   const [show, setShow] = useState(false);
   const [employees, setEmployees] = useState([]);
@@ -29,7 +32,7 @@ const ReturnToolForm = ({ onToolReturned }) => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/employees");
+      const res = await axios.get(`${API_URL}/api/employees`);
       setEmployees(res.data);
       console.log("Employees fetched:", res.data);
     } catch (error) {
@@ -40,11 +43,11 @@ const ReturnToolForm = ({ onToolReturned }) => {
 
   const fetchAssignedTools = async (employeeId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/assigned-tools/employee/${employeeId}`);
+      const res = await axios.get(`${API_URL}/api/assigned-tools/employee/${employeeId}`);
       console.log("📢 Scule atribuite primite:", res.data);
       setAssignedTools(res.data);
       setSelectedAssignedTool("");
-      setReturnQuantity(0);
+      setReturnQuantity(0);W
       setErrorMessage("");
     } catch (error) {
       console.error("❌ Eroare la preluarea sculelor atribuite:", error);
@@ -114,7 +117,7 @@ const ReturnToolForm = ({ onToolReturned }) => {
         cantitate_atribuita: finalReturnQuantity,
         action,
       });
-      const response = await axios.post("http://localhost:5000/api/assigned-tools/return", {
+      const response = await axios.post(`${API_URL}/api/assigned-tools/return`, {
         angajatId: selectedEmployee,
         sculaId: selectedAssignedTool,
         cantitate_atribuita: finalReturnQuantity,

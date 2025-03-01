@@ -5,6 +5,8 @@ import { FaEdit, FaTrash, FaDownload } from "react-icons/fa";
 import EditEmployeeForm from "./EditEmployeeForm";
 import "../styles/EmployeeList.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const EmployeeList = ({ onEmployeeUpdated }) => {
   const [employees, setEmployees] = useState([]);
   const [assignedTools, setAssignedTools] = useState({});
@@ -17,7 +19,7 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
 
   const fetchEmployees = () => {
     axios
-      .get("http://localhost:5000/api/employees")
+      .get(`${API_URL}/api/employees`)
       .then((response) => {
         setEmployees(response.data);
         fetchAssignedTools();
@@ -27,7 +29,7 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
 
   const fetchAssignedTools = () => {
     axios
-      .get("http://localhost:5000/api/assigned-tools")
+      .get(`${API_URL}/api/assigned-tools`)
       .then((response) => {
         const toolsByEmployee = {};
         response.data.forEach((assignment) => {
@@ -46,7 +48,7 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
   const handleDelete = (id) => {
     if (window.confirm("Sigur vrei să ștergi acest angajat?")) {
       axios
-        .delete(`http://localhost:5000/api/employees/${id}`)
+        .delete(`${API_URL}/api/employees/${id}`)
         .then(() => {
           fetchEmployees();
           if (onEmployeeUpdated) onEmployeeUpdated();
@@ -57,7 +59,7 @@ const EmployeeList = ({ onEmployeeUpdated }) => {
 
   const handleExport = (employee) => {
     axios
-      .get(`http://localhost:5000/api/export/employee/${employee._id}`, {
+      .get(`${API_URL}/api/export/employee/${employee._id}`, {
         responseType: "blob",
       })
       .then((response) => {
