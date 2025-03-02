@@ -191,12 +191,20 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
           {getSelectedToolType(selectedTool) === "scula-primara" && (
             <Form.Group className="mb-3">
               <Form.Label>Cantitate</Form.Label>
-              <Form.Control
-                type="number"
+              <Form.Select
                 value={selectedQuantity}
-                min="1"
                 onChange={(e) => setSelectedQuantity(parseInt(e.target.value) || 1)}
-              />
+                style={{ fontSize: "14px", padding: "10px" }}
+              >
+                {Array.from(
+                  { length: tools.find((t) => t._id === selectedTool)?.cantitate || 1 },
+                  (_, i) => i + 1
+                ).map((qty) => (
+                  <option key={qty} value={qty}>
+                    {qty}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
           )}
           <Button variant={buttonColor} onClick={handleAssignTool} className="w-100">

@@ -7,8 +7,15 @@ const DashboardLayout = ({ children }) => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const handleOutsideClick = (e) => {
+    if (isSidebarOpen && e.target.closest('.sidebar-container') === null && 
+        !e.target.classList.contains('sidebar-toggle')) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-layout" onClick={handleOutsideClick}>
       {/* Hamburger Menu for Mobile */}
       <button
         className="sidebar-toggle d-md-none"
