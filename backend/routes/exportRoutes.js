@@ -5,7 +5,7 @@ const AssignedTool = require("../models/AssignedTool");
 const Tool = require("../models/Tool");
 const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType } = require("docx");
 
-// 📌 Export a Single Employee's Report
+// 📌 Export a Single Employee's Reportss
 router.get("/employee/:id", async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
