@@ -72,6 +72,11 @@ router.get("/employee/:id", async (req, res) => {
             }),
 
             new Table({
+              width: {
+                size: 10000, // Full width
+                type: WidthType.DXA,
+              },
+              layout: TableLayoutType.FIXED, // Enforces fixed column widths
               rows: [
                 // Table Header
                 new TableRow({
@@ -84,6 +89,7 @@ router.get("/employee/:id", async (req, res) => {
                         }),
                       ],
                       shading: { fill: "D3D3D3" },
+                      width: { size: 2500, type: WidthType.DXA }, // Set a fixed width
                     }),
                     new TableCell({
                       children: [
@@ -93,6 +99,7 @@ router.get("/employee/:id", async (req, res) => {
                         }),
                       ],
                       shading: { fill: "D3D3D3" },
+                      width: { size: 2500, type: WidthType.DXA },
                     }),
                     new TableCell({
                       children: [
@@ -102,6 +109,7 @@ router.get("/employee/:id", async (req, res) => {
                         }),
                       ],
                       shading: { fill: "D3D3D3" },
+                      width: { size: 2500, type: WidthType.DXA },
                     }),
                     new TableCell({
                       children: [
@@ -111,10 +119,11 @@ router.get("/employee/:id", async (req, res) => {
                         }),
                       ],
                       shading: { fill: "D3D3D3" },
+                      width: { size: 2500, type: WidthType.DXA },
                     }),
                   ],
                 }),
-
+            
                 // Table Data
                 ...sculeValide.map((assign) =>
                   new TableRow({
@@ -122,16 +131,17 @@ router.get("/employee/:id", async (req, res) => {
                       new TableCell({
                         children: [new Paragraph(assign.id_scula.nume)],
                         margins: { top: 100, bottom: 100, left: 200, right: 200 },
+                        width: { size: 2500, type: WidthType.DXA },
                       }),
                       new TableCell({
                         children: [new Paragraph(assign.id_scula.serie || "N/A")],
                         margins: { top: 100, bottom: 100, left: 200, right: 200 },
+                        width: { size: 2500, type: WidthType.DXA },
                       }),
                       new TableCell({
-                        children: [
-                          new Paragraph(assign.cantitate_atribuita.toString()),
-                        ],
+                        children: [new Paragraph(assign.cantitate_atribuita.toString())],
                         margins: { top: 100, bottom: 100, left: 200, right: 200 },
+                        width: { size: 2500, type: WidthType.DXA },
                       }),
                       new TableCell({
                         children: [
@@ -142,12 +152,15 @@ router.get("/employee/:id", async (req, res) => {
                           ),
                         ],
                         margins: { top: 100, bottom: 100, left: 200, right: 200 },
+                        width: { size: 2500, type: WidthType.DXA },
                       }),
                     ],
                   })
                 ),
               ],
             }),
+            
+
 
             new Paragraph({ text: "", spacing: { after: 300 } }),
           ],
