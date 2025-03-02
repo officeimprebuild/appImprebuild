@@ -10,7 +10,7 @@ router.get("/employee/:id", async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ error: "Angajatul nu a fost găsit" });
+      return res.status(404).json({ error: "Angajatul nu a fost gasit" });
     }
 
     const assignedTools = await AssignedTool.find({ id_angajat: employee._id }).populate("id_scula");
@@ -42,9 +42,9 @@ router.get("/employee/:id", async (req, res) => {
       .text(`Telefon: ${employee.telefon}`, { align: "right" })
       .text(`Companie: ${employee.companie || "N/A"}`)
       .text(`Status: ${employee.status ? "Activ" : "Inactiv"}`)
-      .text(`Mărime Tricou: ${employee.marime_tricou || "N/A"}`)
-      .text(`Mărime Pantaloni: ${employee.marime_pantaloni || "N/A"}`)
-      .text(`Mărime Bocanci: ${employee.masura_bocanci || "N/A"}`)
+      .text(`Marime Tricou: ${employee.marime_tricou || "N/A"}`)
+      .text(`Marime Pantaloni: ${employee.marime_pantaloni || "N/A"}`)
+      .text(`Marime Bocanci: ${employee.masura_bocanci || "N/A"}`)
       .moveDown();
 
     // 🔧 Tools Section
@@ -59,7 +59,7 @@ router.get("/employee/:id", async (req, res) => {
 
     doc
       .fontSize(12)
-      .text("Nume Sculă", itemColumn, tableTop, { bold: true })
+      .text("Nume Scula", itemColumn, tableTop, { bold: true })
       .text("Serie", serieColumn, tableTop)
       .text("Cantitate", quantityColumn, tableTop)
       .text("Data Atribuirii", dateColumn, tableTop);
