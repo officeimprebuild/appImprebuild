@@ -37,28 +37,57 @@ router.get("/employee/:id", async (req, res) => {
     doc.fontSize(16).text("Datele Angajatului", { underline: true });
     doc
       .fontSize(12)
-      .text(`Nume: ${employee.nume}`)
-      .text(`Telefon: ${employee.telefon}`)
+      .moveDown()
+      .text(`Nume: ${employee.nume}`, { continued: true, width: 250 })
+      .text(`Telefon: ${employee.telefon}`, { align: "right" })
       .text(`Companie: ${employee.companie || "N/A"}`)
       .text(`Status: ${employee.status ? "Activ" : "Inactiv"}`)
-      .text(`Mărime tricou: ${employee.marime_tricou || "N/A"}`)
-      .text(`Mărime pantaloni: ${employee.marime_pantaloni || "N/A"}`)
-      .text(`Mărime bocanci: ${employee.masura_bocanci || "N/A"}`)
+      .text(`Mărime Tricou: ${employee.marime_tricou || "N/A"}`)
+      .text(`Mărime Pantaloni: ${employee.marime_pantaloni || "N/A"}`)
+      .text(`Mărime Bocanci: ${employee.masura_bocanci || "N/A"}`)
       .moveDown();
 
     // 🔧 Tools Section
     doc.fontSize(16).text("Scule Atribuite:", { underline: true }).moveDown();
 
-    // 🧾 Table Header
-    doc.fontSize(12).text(`| ${"Nume Sculă".padEnd(20)} | ${"Serie".padEnd(15)} | ${"Cantitate".padEnd(10)} | ${"Data Atribuirii".padEnd(15)} |`);
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    // Table Header
+    const tableTop = doc.y;
+    const itemColumn = 50;
+    const serieColumn = 200;
+    const quantityColumn = 350;
+    const dateColumn = 450;
 
-    // 🛠️ Table Data
-    sculeValide.forEach(assign => {
-      doc.text(
-        `| ${assign.id_scula.nume.padEnd(20)} | ${assign.id_scula.serie?.padEnd(15) || "N/A".padEnd(15)} | ${assign.cantitate_atribuita.toString().padEnd(10)} | ${new Date(assign.data_atribuire).toLocaleDateString().padEnd(15)} |`
-      );
+    doc
+      .fontSize(12)
+      .text("Nume Sculă", itemColumn, tableTop, { bold: true })
+      .text("Serie", serieColumn, tableTop)
+      .text("Cantitate", quantityColumn, tableTop)
+      .text("Data Atribuirii", dateColumn, tableTop);
+
+    doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).stroke().moveDown();
+
+    // Table Rows
+    sculeValide.forEach((assign, i) => {
+      const rowTop = doc.y + 5;
+
+      doc
+        .fontSize(10)
+        .text(assign.id_scula.nume, itemColumn, rowTop)
+        .text(assign.id_scula.serie || "N/A", serieColumn, rowTop)
+        .text(assign.cantitate_atribuita.toString(), quantityColumn, rowTop)
+        .text(
+          assign.data_atribuire
+            ? new Date(assign.data_atribuire).toLocaleDateString("ro-RO")
+            : "N/A",
+          dateColumn,
+          rowTop
+        );
+
+      // Optional: Draw row separator
+      doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).dash(1, { space: 1 }).stroke();
     });
+
+    doc.moveDown();
 
     // 🎨 Finalize PDF
     doc.end();
