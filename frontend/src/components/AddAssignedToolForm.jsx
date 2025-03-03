@@ -176,17 +176,19 @@ const AddAssignedToolForm = ({ onToolAssigned, buttonColor = "primary" }) => {
           <Form.Group className="mb-3">
             <Form.Label>Sculă</Form.Label>
             <Form.Control
-              as="select"
-              value={selectedTool}
-              onChange={(e) => setSelectedTool(e.target.value)}
-            >
-              <option value="">Selectează o sculă</option>
-              {tools.map((tool) => (
-                <option key={tool._id} value={tool._id}>
-                  {`${tool.nume}, ${tool.serie || "N/A"} (${tool.cantitate} disponibile)`}
-                </option>
-              ))}
-            </Form.Control>
+  as="select"
+  value={selectedTool}
+  onChange={(e) => setSelectedTool(e.target.value)}
+>
+  <option value="">Selectează o sculă</option>
+  {tools
+    .filter((tool) => tool.tip !== "scula-cu-serie" || tool.cantitate > 0) // Filter logic
+    .map((tool) => (
+      <option key={tool._id} value={tool._id}>
+        {`${tool.nume}, ${tool.serie || "N/A"} (${tool.cantitate} disponibile)`}
+      </option>
+    ))}
+</Form.Control>
           </Form.Group>
           {getSelectedToolType(selectedTool) === "scula-primara" && (
             <Form.Group className="mb-3">
