@@ -65,7 +65,7 @@ router.get("/employee/:id", async (req, res) => {
 
       doc
         .fontSize(12)
-        .text("Nume Sculă", itemColumn, tableTop, { bold: true })
+        .text("Nume Scula", itemColumn, tableTop, { bold: true })
         .text("Serie", serieColumn, tableTop)
         .text("Cantitate", quantityColumn, tableTop)
         .text("Data Atribuirii", dateColumn, tableTop);
