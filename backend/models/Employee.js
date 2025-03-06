@@ -9,7 +9,6 @@ const EmployeeSchema = new Schema({
     marime_pantaloni: { type: String },
     masura_bocanci: { type: String },
     status: { type: Boolean, default: true },
-    assignedTools: [{ type: Schema.Types.ObjectId, ref: "Tool" }] // ✅ Corectăm referința
 });
 
 module.exports = mongoose.model("Employee", EmployeeSchema);

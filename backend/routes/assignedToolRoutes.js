@@ -61,28 +61,12 @@ router.get("/", async (req, res) => {
 // Obține toate sculele atribuite unui angajat
 router.get("/employee/:id", async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
-
-    if (!employee) {
-      return res.status(404).json({ error: "Angajatul nu a fost găsit" });
-    }
-
-    // Fetch assigned tools using the AssignedTool model
-    const assignedTools = await AssignedTool.find({ id_angajat: employee._id })
-      .populate("id_scula") // Populate the actual tool data
-      .populate({
-        path: "id_scula",
-        model: "Tool",
-        select: "nume serie cantitate_atribuita",
-      });
-
-    res.status(200).json({
-      ...employee.toObject(),
-      assignedTools,
-    });
+    const assignedTools = await AssignedTool.find({ id_angajat: req.params.id })
+      .populate("id_scula", "nume serie cantitate")
+      .select("id_scula cantitate_atribuita serie data_atribuire");
+    res.json(assignedTools);
   } catch (error) {
-    console.error("Eroare la preluarea sculelor atribuite:", error);
-    res.status(500).json({ error: "Eroare la preluarea sculelor atribuite" });
+    res.status(500).json({ error: error.message });
   }
 });
 
