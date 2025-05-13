@@ -1,8 +1,11 @@
+// ✅ BACKEND - exportRoutes.js
+
 const express = require("express");
 const router = express.Router();
 const Employee = require("../models/Employee");
 const AssignedTool = require("../models/AssignedTool");
 const PDFDocument = require("pdfkit");
+const ExcelJS = require("exceljs");
 
 // 📌 Export a Single Employee's Report as a PDF
 router.get("/employee/:id", async (req, res) => {
@@ -26,7 +29,7 @@ router.get("/employee/:id", async (req, res) => {
 
     // Stream the response
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Disposition", `attachment; filename=\"${fileName}\"`);
     doc.pipe(res);
 
     // Function to add the first page with title and employee details
@@ -52,7 +55,6 @@ router.get("/employee/:id", async (req, res) => {
 
       doc.fontSize(16).text("Scule Atribuite:", { underline: true }).moveDown();
 
-      // Draw table header
       drawTableHeader();
     };
 
@@ -73,28 +75,22 @@ router.get("/employee/:id", async (req, res) => {
       doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).stroke().moveDown();
     };
 
-    // Function to add a new page only with table content
     const addNewPage = () => {
       doc.addPage();
       drawTableHeader();
     };
 
-    // Add the first page with all details
     addFirstPage();
 
-    // Define row layout
     const itemColumn = 50;
     const serieColumn = 200;
     const quantityColumn = 350;
     const dateColumn = 450;
 
-    // Maximum number of rows per page
     const maxRowsPerPage = 25;
     let rowCount = 0;
 
-    // Table Rows
     sculeValide.forEach((assign) => {
-      // Check if new page is needed
       if (rowCount >= maxRowsPerPage) {
         addNewPage();
         rowCount = 0;
@@ -116,7 +112,6 @@ router.get("/employee/:id", async (req, res) => {
         );
 
       doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).dash(1, { space: 1 }).stroke();
-      
       rowCount++;
     });
 
@@ -125,6 +120,47 @@ router.get("/employee/:id", async (req, res) => {
   } catch (error) {
     console.error("Eroare la generarea documentului:", error);
     res.status(500).json({ error: "Eroare la generarea documentului" });
+  }
+});
+
+// ✅ Export Excel with clothing sizes
+router.get("/employees/clothes-sizes", async (req, res) => {
+  try {
+    const employees = await Employee.find({});
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Marimi Angajati");
+
+    worksheet.columns = [
+      { header: "Nume", key: "nume", width: 30 },
+      { header: "Tricou", key: "marime_tricou", width: 15 },
+      { header: "Pantaloni", key: "marime_pantaloni", width: 15 },
+      { header: "Bocanci", key: "masura_bocanci", width: 15 },
+    ];
+
+    employees.forEach((emp) => {
+      worksheet.addRow({
+        nume: emp.nume || "",
+        marime_tricou: emp.marime_tricou || "",
+        marime_pantaloni: emp.marime_pantaloni || "",
+        masura_bocanci: emp.masura_bocanci || "",
+      });
+    });
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=marimi_angajati.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.send(buffer);
+  } catch (err) {
+    console.error("❌ Eroare la exportul mărimilor:", err);
+    res.status(500).send("Eroare server.");
   }
 });
 
