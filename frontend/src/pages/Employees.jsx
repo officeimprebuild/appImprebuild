@@ -39,11 +39,15 @@ const Employees = () => {
 
       {/* Adaugă + Export Buttons */}
       <Row className="justify-content-center mb-3">
-        <Col xs={12} md={8} lg={6} className="d-flex justify-content-between">
-          <AddEmployeeForm onEmployeeAdded={handleEmployeeAdded} />
-          <Button variant="info" onClick={handleDownloadSizes}>
-            📥 Descarcă Mărimi
-          </Button>
+        <Col xs={12} md={8} lg={6}>
+          <div className="button-pair-wrapper">
+            <div>
+              <AddEmployeeForm onEmployeeAdded={handleEmployeeAdded} />
+            </div>
+            <Button className="employee-button" onClick={handleDownloadSizes}>
+              📥 Descarcă Mărimi
+            </Button>
+          </div>
         </Col>
       </Row>
 

@@ -1,5 +1,3 @@
-// ✅ BACKEND - exportRoutes.js
-
 const express = require("express");
 const router = express.Router();
 const Employee = require("../models/Employee");
@@ -18,21 +16,17 @@ router.get("/employee/:id", async (req, res) => {
     const assignedTools = await AssignedTool.find({ id_angajat: employee._id }).populate("id_scula");
     let sculeValide = assignedTools.filter(assign => assign.id_scula);
 
-    // 📅 Sort tools by assignment date in descending order
     sculeValide = sculeValide.sort((a, b) => new Date(b.data_atribuire) - new Date(a.data_atribuire));
 
     const currentDate = new Date().toLocaleDateString("ro-RO").replace(/\//g, "-");
     const fileName = `Proces_Verbal_${employee.nume}_${currentDate}.pdf`;
 
-    // Create a new PDF document with margin
     const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
 
-    // Stream the response
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=\"${fileName}\"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     doc.pipe(res);
 
-    // Function to add the first page with title and employee details
     const addFirstPage = () => {
       doc.addPage();
       doc
@@ -123,29 +117,61 @@ router.get("/employee/:id", async (req, res) => {
   }
 });
 
-// ✅ Export Excel with clothing sizes
+// ✅ Export Excel with clothing sizes + summary in same sheet
 router.get("/employees/clothes-sizes", async (req, res) => {
   try {
     const employees = await Employee.find({});
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Marimi Angajati");
+    const sheet = workbook.addWorksheet("Marimi Angajati");
 
-    worksheet.columns = [
+    // 1. Header
+    sheet.columns = [
       { header: "Nume", key: "nume", width: 30 },
       { header: "Tricou", key: "marime_tricou", width: 15 },
       { header: "Pantaloni", key: "marime_pantaloni", width: 15 },
       { header: "Bocanci", key: "masura_bocanci", width: 15 },
     ];
 
+    // 2. Employees
     employees.forEach((emp) => {
-      worksheet.addRow({
+      sheet.addRow({
         nume: emp.nume || "",
         marime_tricou: emp.marime_tricou || "",
         marime_pantaloni: emp.marime_pantaloni || "",
         masura_bocanci: emp.masura_bocanci || "",
       });
     });
+
+    // 3. Empty rows
+    sheet.addRow([]);
+    sheet.addRow([]);
+
+    // 4. Summary
+    const countBy = (arr) =>
+      arr.reduce((acc, val) => {
+        if (!val) return acc;
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+    const tricouCounts = countBy(employees.map((e) => e.marime_tricou));
+    const pantaloniCounts = countBy(employees.map((e) => e.marime_pantaloni));
+    const bocanciCounts = countBy(employees.map((e) => e.masura_bocanci));
+
+    const writeSummary = (title, counts) => {
+      sheet.addRow([`📊 Sumar Mărimi ${title}`]);
+      sheet.getRow(sheet.lastRow.number).font = { bold: true };
+      sheet.addRow(["Mărime", "Număr"]);
+      Object.entries(counts).forEach(([size, count]) => {
+        sheet.addRow([size, count]);
+      });
+      sheet.addRow([]);
+    };
+
+    writeSummary("Tricou", tricouCounts);
+    writeSummary("Pantaloni", pantaloniCounts);
+    writeSummary("Bocanci", bocanciCounts);
 
     res.setHeader(
       "Content-Disposition",
